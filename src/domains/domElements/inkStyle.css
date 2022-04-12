@@ -1,0 +1,41 @@
+@keyframes movement {
+  0% {
+    transform: var(--transformFrom);
+  },
+  100% {
+    transform: var(--transformTo);
+  }
+}
+
+@keyframes removement {
+  0% {
+    transform: var(--transformFrom);
+  },
+  100% {
+    transform: var(--transformTo);
+  }
+}
+
+@keyframes identifier {
+  0%, 100% { opacity: 0 }
+  50% { opacity: 1 }
+}
+
+.inkPixel {
+  width: var(--inkSize);
+  height: var(--inkSize);
+  top: 0;
+  left: 0;
+  background: #000;
+  position: absolute;
+  transform-origin: center center;
+  transform: var(--transformTo)
+}
+
+.inkPixel.moving {
+  animation: movement 1s ease-in;
+}
+.inkPixel.removing {
+  animation: removement 1s ease-in;
+}
+

@@ -1,0 +1,33 @@
+body {
+  font-family: 'Fira Code', monospace; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #000;
+  margin-top: 60px;
+}
+
+
+.text {
+   position: absolute;
+   opacity: 0;
+}
+
+.pixelSpace {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 1;
+  transition: all 1s;
+}
+
+.calibration {
+  position: absolute;
+  left: 100px;
+  top: 100px;
+  width: 1px;
+  height: 1px;
+  background: red;
+} 
+
+canvas {
+}
