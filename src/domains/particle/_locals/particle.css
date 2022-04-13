@@ -1,0 +1,48 @@
+@keyframes movement {
+  0% {
+    transform: var(--transformFrom);
+  },
+  100% {
+    transform: var(--transformTo);
+  }
+}
+
+@keyframes removement {
+  0% {
+    transform: var(--transformFrom);
+  },
+  100% {
+    transform: var(--transformTo);
+  }
+}
+
+@keyframes identifier {
+  0%, 100% { opacity: 0 }
+  50% { opacity: 1 }
+}
+
+.particle {
+  width: var(--particleSize);
+  height: var(--particleSize);
+  top: 0;
+  left: 0;
+  background: #f00;
+  position: absolute;
+  transform-origin: center center;
+  transform: var(--transformTo)
+}
+
+.particle.moving {
+  animation: movement 1s ease-in;
+}
+.particle.removing {
+  animation: removement 1s ease-in;
+}
+
+
+
+.particlePlace {
+  position: absolute;
+  left: 0;
+  top: 0;
+}

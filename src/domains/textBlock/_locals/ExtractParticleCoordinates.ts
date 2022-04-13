@@ -1,20 +1,20 @@
-import { CreateContext } from "../canvas/CreateContext";
-import { PixelIterator } from "../canvas/PixelIterator";
-
-export type ParticleCoordinate = { x: number; y: number };
+import { CreateContext } from "./CreateContext";
+import { Coordinate } from "../../shared/types";
+import { GetTextOffset } from "./GetTextOffset";
+import { PixelIterator } from "./PixelIterator";
 
 //TODO: make LineHeightAdjustments depend on a browser UA
 const LineHeightAdjustments= 0.14;
 
-export function GenerateParticleCoordinates(
+export function ExtractParticleCoordinates(
   text: string,
   fontSize: number,
   fontFamily: string,
   rect: DOMRect,
-  offsets: {x: number, y: number}
-): ParticleCoordinate[] {
+): [Coordinate[], number] {
   const { width, height} = rect;
   const context = CreateContext(width, height);
+  const offsets = GetTextOffset(fontFamily);
 
   if (!context) {
     throw new Error("No context");
@@ -26,7 +26,7 @@ export function GenerateParticleCoordinates(
   context.fillStyle = "black";
   context.textBaseline = "top";
   context.fillText(text, 0, -offsets.y * (fontSize * 0.01) + fontSize * LineHeightAdjustments);
-  const coords: ParticleCoordinate[] = [...PixelIterator(context, 240)];
+  console.log(context.measureText('T'));
 
-  return coords;
+  return [[...PixelIterator(context, 240)], context.measureText('T').width];
 }
