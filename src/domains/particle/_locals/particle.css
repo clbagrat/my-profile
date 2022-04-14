@@ -7,38 +7,22 @@
   }
 }
 
-@keyframes removement {
-  0% {
-    transform: var(--transformFrom);
-  },
-  100% {
-    transform: var(--transformTo);
-  }
-}
-
-@keyframes identifier {
-  0%, 100% { opacity: 0 }
-  50% { opacity: 1 }
-}
-
 .particle {
-  width: var(--particleSize);
-  height: var(--particleSize);
+  width: 0.5px;
+  height: 0.5px;
   top: 0;
   left: 0;
-  background: #f00;
+  background: #000;
   position: absolute;
   transform-origin: center center;
-  transform: var(--transformTo)
+  transform: var(--transformTo);
+  opacity: 1;
+  transition: opacity 0.5s;
 }
 
 .particle.moving {
-  animation: movement 1s ease-in;
+  animation: movement 1s ease-in-out;
 }
-.particle.removing {
-  animation: removement 1s ease-in;
-}
-
 
 
 .particlePlace {

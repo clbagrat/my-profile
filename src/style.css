@@ -28,6 +28,7 @@ body {
   height: 1px;
   background: red;
 } 
-
-canvas {
+.ink {
+  position: absolute;
 }
+

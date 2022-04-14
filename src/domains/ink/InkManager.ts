@@ -1,11 +1,12 @@
-import {ParticleManager} from "../particle/ParticleManager";
-import {Coordinate} from "../shared/types";
-import {TextBlock} from "../textBlock/TextBlock";
-const PARTICLE_STEP = 30;
+import { ParticleManager } from "../particle/ParticleManager";
+import { Coordinate } from "../shared/types";
+import { TextBlock } from "../textBlock/TextBlock";
+
+const PARTICLE_STEP = 100;
 const inkPlace: HTMLElement | null = document.querySelector('.ink');
 
 export class InkManager {
-  private _currentInkAmount: number = 10800;
+  private _currentInkAmount: number = 0;
 
   get currentInkAmount() {
     return this._currentInkAmount;
@@ -16,7 +17,9 @@ export class InkManager {
     this._currentInkAmount = value
   }
 
-  constructor(private particleManager: ParticleManager) {}
+  constructor(private particleManager: ParticleManager) {
+    this.currentInkAmount = 10000;
+  }
 
   provideInkTo(textBlock: TextBlock) {
     const step = Math.min(PARTICLE_STEP, this.currentInkAmount);
@@ -25,11 +28,17 @@ export class InkManager {
 
     if (allocatedCount) {
       this.currentInkAmount -= allocatedCount;
-      console.log(allocatedParticlePlaces);
       allocatedParticlePlaces.forEach((destination: Coordinate) => {
         const particle = this.particleManager.getParticleFromPool();
         this.particleManager
-          .moveParticle(particle, { x: 100, y: 100 }, destination)
+          .moveParticle(
+            particle,
+            {
+              x: destination.x + Math.random() * 100,
+              y: destination.y + (0.5 - Math.random()) * 100,
+            },
+            destination
+          )
           .then(() => {
             textBlock.receiveParticle(particle);
           });
@@ -48,7 +57,10 @@ export class InkManager {
       particleCoordList.forEach((coord) => {
         const particle = this.particleManager.getParticleFromPool();
         this.particleManager
-          .moveParticle(particle, coord, {x: 100, y: 100})
+          .moveParticle(particle, coord, {
+              x: window.myTransform.x + (0.5 - Math.random()) * 30,
+              y: window.myTransform.y + (0.5 - Math.random()) * 30,
+          })
           .then(() => {
             this.currentInkAmount += 1;
             this.particleManager.release(particle);

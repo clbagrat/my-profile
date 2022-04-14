@@ -7,12 +7,12 @@ import {ParticleManager} from './domains/particle/ParticleManager';
 //
 //
 window.devicePixelRatio = 2;
-//const myTransform = {x: 0, y: 0};
+window.myTransform = {x: 0, y: 0};
 //
-//document.addEventListener("mousemove", (e) => {
-//  let x = (myTransform.x = e.clientX);
-//  let y = (myTransform.y = e.clientY);
-//});
+document.addEventListener("mousemove", (e) => {
+  (window.myTransform.x = e.clientX);
+  (window.myTransform.y = e.clientY);
+});
 //
 //const setPixelsInPlace = (pixels: HTMLDivElement[], wordCoords: ParticleCoordinate[], rect: DOMRect, reverse?: boolean) => {
 //  const nodes = pixels.splice(0, 120);
@@ -120,7 +120,7 @@ window.devicePixelRatio = 2;
 //
 
 const particlePlace = document.querySelector('.particlePlace') as HTMLElement;
-const particeManager = new ParticleManager(particlePlace, 10);
+const particeManager = new ParticleManager(particlePlace, 5000);
 const inkManager = new InkManager(particeManager);
 
 const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
@@ -130,3 +130,4 @@ textList.forEach((node: HTMLDivElement) => {
 });
 
 window.particleManager = particeManager;
+window.inkManager = inkManager;

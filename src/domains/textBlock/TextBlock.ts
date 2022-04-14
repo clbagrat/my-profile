@@ -17,6 +17,8 @@ export class TextBlock {
   private revealedLetterCount: number = 0;
   private oneLetterWidth;
 
+  private rect: DOMRect;
+
   constructor(
     private node: HTMLElement,
     private inkManager: InkManager,
@@ -30,14 +32,16 @@ export class TextBlock {
     node.style.lineHeight = `${font}px`;
 
     this.fullText = text;
-    this.fullLetterCount = text.replace(/\s/g, '').length;
+    this.fullLetterCount = text.length;
     this.updateText();
+
+    this.rect = node.getBoundingClientRect();
 
     const [particleCoordList, oneLetterWidth] = ExtractParticleCoordinates(
       text,
       parseInt(font, 10),
       fontFamily,
-      node.getBoundingClientRect()
+      this.rect
     );
 
     this.particleCoordList = particleCoordList;
@@ -110,18 +114,21 @@ export class TextBlock {
     ] || { x: 0, y: 0 };
 
 
-    const { x } = lastTakenParticleCoord;
+    const x = Math.max(lastTakenParticleCoord.x - this.rect.x, 0);
 
-    const expectedRevealedLettersCount = Math.floor(x / this.oneLetterWidth);
-    const isLastLetter = this.fullLetterCount - this.revealedLetterCount === 1;
+    const expectedRevealedLettersCount = Math.floor((x) / this.oneLetterWidth);
+    const isLastLetter = (this.fullLetterCount - this.revealedLetterCount) === 1;
 
     if (
-        isLastLetter && this.takenParticleCount === this.particleCount ||
-        !isLastLetter && this.revealedLetterCount !== expectedRevealedLettersCount
+        this.takenParticleCount === this.particleCount ||
+        this.revealedLetterCount !== expectedRevealedLettersCount
     ) {
-      this.revealedLetterCount = expectedRevealedLettersCount;
+      if (isLastLetter && this.takenParticleCount === this.particleCount) {
+        this.revealedLetterCount = this.fullLetterCount;
+      } else {
+        this.revealedLetterCount = expectedRevealedLettersCount;
+      }
 
-      console.log("RELEASE",this.takenParticleCount, this.particlesInPossession)
       for (let i = 0; i < this.takenParticleCount; i += 1) {
         const p = this.particlesInPossession[i];
         if (p) {
@@ -135,13 +142,7 @@ export class TextBlock {
   }
 
   private updateText() {
-    const currentText = this.fullText.replace(
-      new RegExp(`((?:\\s*?\\S){${this.revealedLetterCount}})(.*)`, 'g'),
-      (_, left, right) => {
-        return left + right.replace(/\S/g, "&nbsp;");
-      }
-    );
-    console.log({currentText})
+    const currentText = this.fullText.slice(0, this.revealedLetterCount) + this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;")
     this.node.innerHTML = currentText;
   }
 

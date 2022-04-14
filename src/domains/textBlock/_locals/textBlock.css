@@ -1,4 +1,12 @@
 .text-block {
-  display: inline;
+  position:absolute;
   outline: 1px solid red;
 }
+canvas {
+  position:absolute;
+  outline: 1px solid red;
+  opacity: 0.2;
+  pointer-events: none;
+
+}
+

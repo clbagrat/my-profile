@@ -3,6 +3,7 @@ import { Coordinate } from "../../shared/types";
 export function* PixelIterator(
   context: CanvasRenderingContext2D,
   colorThreshold: number,
+  offset: Coordinate
 ) : Generator<Coordinate>{
   const canvas = context.canvas;
   const { width, height } = canvas;
@@ -16,8 +17,8 @@ export function* PixelIterator(
       if (color >= colorThreshold) continue;
 
       yield {
-        x: w,
-        y: h 
+        x: offset.x + w / window.devicePixelRatio,
+        y: offset.y + h / window.devicePixelRatio
       }
     }
   }
