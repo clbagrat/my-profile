@@ -11,7 +11,7 @@ export function ExtractParticleCoordinates(
   fontSize: number,
   fontFamily: string,
   rect: DOMRect,
-): [Coordinate[], number] {
+): [Coordinate[], number, number[]] {
   const { width, height, x, y} = rect;
   const context = CreateContext(width, height);
   const offsets = GetTextOffset(fontFamily);
@@ -25,7 +25,33 @@ export function ExtractParticleCoordinates(
   context.font = `${fontSize}px '${fontFamily}'`;
   context.fillStyle = "black";
   context.textBaseline = "top";
-  context.fillText(text, 0, -offsets.y * (fontSize * 0.01) + fontSize * LineHeightAdjustments);
+
+  const textArray = text.split(" ");
+  let lineCount = 0;
+  let lastWordIndex = 0;
+  let charsPerRow: number[] = [];
+
+  for (let i = 0; i < textArray.length; i += 1) {
+    const measure = context.measureText(
+      textArray.slice(lastWordIndex, i + 1).join(" ")
+    ).width;
+    const targetIndex = i === textArray.length - 1 ? i + 1 : i;
+    if (measure > width || i === textArray.length - 1) {
+      const textSlice = textArray.slice(lastWordIndex, targetIndex).join(" ") + ' ';
+
+      context.fillText(
+        textSlice,
+        0,
+        -offsets.y * (fontSize * 0.01) +
+          fontSize * LineHeightAdjustments +
+          lineCount * fontSize
+      );
+      charsPerRow.push(textSlice.length);
+      lastWordIndex = i;
+      lineCount += 1;
+    }
+  }
+
 //  const oneLetterWidth = context.measureText('T').width;
 //  
 //  context.beginPath()
@@ -36,5 +62,9 @@ export function ExtractParticleCoordinates(
 //  }
 //  context.stroke();
 
-  return [[...PixelIterator(context, 240, {x, y})], context.measureText('T').width];
+  return [
+    [...PixelIterator(context, 240, { x, y }, fontSize)],
+    context.measureText("T").width,
+    charsPerRow
+  ];
 }

@@ -8,7 +8,7 @@ export function CreateContext(width: number, height: number, ratio: number = 2):
   canvas.style.height = `${height}px`
 
   const context = canvas.getContext("2d");
-//  document.body.appendChild(canvas)
+  document.body.appendChild(canvas)
   
   context?.setTransform(dpr, 0, 0, dpr, 0, 0);
 

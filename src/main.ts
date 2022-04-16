@@ -122,10 +122,6 @@ document.addEventListener("mousemove", (e) => {
 const particlePlace = document.querySelector(".particlePlace") as HTMLElement;
 const particeManager = new ParticleManager(particlePlace, 2500);
 
-for(let i = 0; i < 1000; i += 1) {
-  particeManager.populateParticle(true)
-}
-
 const inkManager = new InkManager(particeManager);
 
 const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");

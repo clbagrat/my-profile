@@ -50,7 +50,7 @@ export class ParticleManager {
       throw new Error("cant move particle twice");
     }
     particle.state = "moving";
- //   particle.node.style.opacity = 1..toString();
+    particle.node.style.opacity = 1..toString();
     particle.node.style.setProperty('--transformFrom', `translate(${from.x}px, ${from.y}px)`);
     particle.node.style.setProperty('--transformTo', `translate(${to.x}px, ${to.y}px)`);
     particle.node.classList.add('moving');
@@ -69,7 +69,7 @@ export class ParticleManager {
   }
 
 
-   populateParticle(addAnimation = false) {
+   populateParticle() {
     const inkSize = 1;
     const node = document.createElement("div");
     node.classList.add("particle");
@@ -78,25 +78,11 @@ export class ParticleManager {
       `${inkSize / window.devicePixelRatio}px`
     );
 
-    if (addAnimation) {
- //     node.style.setProperty(
- //       "--transformFrom",
- //       `translate(${Math.random() * 100}px, ${Math.random() * 100}px)`
- //     );
-      node.style.setProperty(
-        "--transformTo",
-        `translate(${Math.random() * 100}px, ${Math.random() * 100}px)`
-      );
-      node.classList.add("idle");
-    }
-
     this.particleSpace.appendChild(node);
-    if (!addAnimation) {
 
     this.pool.add({
       node,
       state: "pool"
     });
-    }
   }
 }

@@ -17,6 +17,8 @@ export class TextBlock {
   private fullLetterCount: number;
   private revealedLetterCount: number = 0;
   private oneLetterWidth;
+  private oneLetterHeight;
+  private lettersPerRow;
 
   private rect: DOMRect;
 
@@ -38,15 +40,18 @@ export class TextBlock {
 
     this.rect = node.getBoundingClientRect();
 
-    const [particleCoordList, oneLetterWidth] = ExtractParticleCoordinates(
+    const [particleCoordList, oneLetterWidth, lettersPerRow] = ExtractParticleCoordinates(
       text,
       parseInt(font, 10),
       fontFamily,
       this.rect
     );
+    console.log({lettersPerRow});
 
     this.particleCoordList = particleCoordList;
     this.oneLetterWidth = oneLetterWidth;
+    this.oneLetterHeight = parseInt(font, 10);
+    this.lettersPerRow = lettersPerRow;
     this.particleCount = this.particleCoordList.length;
 
     this.assignEvents();
@@ -114,15 +119,22 @@ export class TextBlock {
       this.takenParticleCount - 1
     ] || { x: 0, y: 0 };
 
-
     const x = Math.max(lastTakenParticleCoord.x - this.rect.x, 0);
+    const y = Math.max(lastTakenParticleCoord.y - this.rect.y, 0);
+    const expectedRow = Math.floor(y / this.oneLetterHeight);
+    const prevRowLetters = this.lettersPerRow
+      .slice(0, expectedRow)
+      .reduce((acc, c) => c + acc, 0);
 
-    const expectedRevealedLettersCount = Math.floor((x) / this.oneLetterWidth);
-    const isLastLetter = (this.fullLetterCount - this.revealedLetterCount) === 1;
+
+    const expectedRevealedLettersCount =
+      Math.floor(x / this.oneLetterWidth) + prevRowLetters;
+    console.log(expectedRow, prevRowLetters, expectedRevealedLettersCount, this.fullText[expectedRevealedLettersCount]);
+    const isLastLetter = this.fullLetterCount - this.revealedLetterCount === 1;
 
     if (
-        this.takenParticleCount === this.particleCount ||
-        this.revealedLetterCount !== expectedRevealedLettersCount
+      this.takenParticleCount === this.particleCount ||
+      this.revealedLetterCount !== expectedRevealedLettersCount
     ) {
       if (isLastLetter && this.takenParticleCount === this.particleCount) {
         this.revealedLetterCount = this.fullLetterCount;
@@ -145,6 +157,7 @@ export class TextBlock {
   private updateText() {
     const currentText = this.fullText.slice(0, this.revealedLetterCount) + this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;")
     this.node.innerHTML = currentText;
+//    this.node.innerHTML = this.fullText
   }
 
   private assignEvents() {

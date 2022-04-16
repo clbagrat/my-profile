@@ -35,3 +35,13 @@ body {
   position: absolute;
 }
 
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+.main-content {
+  max-width: 150px;
+
+}
+
