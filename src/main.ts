@@ -1,17 +1,17 @@
-import './style.css'
-import {TextBlock} from './domains/textBlock/TextBlock';
-import { InkManager } from './domains/ink/InkManager';
-import {ParticleManager} from './domains/particle/ParticleManager';
+import "./style.css";
+import { TextBlock } from "./domains/textBlock/TextBlock";
+import { InkManager } from "./domains/ink/InkManager";
+import { ParticleManager } from "./domains/particle/ParticleManager";
 //import { GenerateParticleCoordinates, ParticleCoordinate } from "./domains/particle/GenerateParticleCoordinates";
 //import { CreateInkPixel } from "./domains/domElements/CreateInkPixel";
 //
 //
 window.devicePixelRatio = 2;
-window.myTransform = {x: 0, y: 0};
+window.myTransform = { x: 0, y: 0 };
 //
 document.addEventListener("mousemove", (e) => {
-  (window.myTransform.x = e.clientX);
-  (window.myTransform.y = e.clientY);
+  window.myTransform.x = e.clientX;
+  window.myTransform.y = e.clientY;
 });
 //
 //const setPixelsInPlace = (pixels: HTMLDivElement[], wordCoords: ParticleCoordinate[], rect: DOMRect, reverse?: boolean) => {
@@ -119,12 +119,17 @@ document.addEventListener("mousemove", (e) => {
 //};
 //
 
-const particlePlace = document.querySelector('.particlePlace') as HTMLElement;
-const particeManager = new ParticleManager(particlePlace, 5000);
+const particlePlace = document.querySelector(".particlePlace") as HTMLElement;
+const particeManager = new ParticleManager(particlePlace, 2500);
+
+for(let i = 0; i < 1000; i += 1) {
+  particeManager.populateParticle(true)
+}
+
 const inkManager = new InkManager(particeManager);
 
 const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
-console.log({inkManager})
+console.log({ inkManager });
 textList.forEach((node: HTMLDivElement) => {
   console.log(new TextBlock(node, inkManager, particeManager));
 });

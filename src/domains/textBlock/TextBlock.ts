@@ -2,7 +2,8 @@ import "./_locals/textBlock.css";
 import { Coordinate } from "../shared/types";
 import { InkManager } from "../ink/InkManager";
 import { Particle, ParticleManager } from "../particle/ParticleManager";
-import {ExtractParticleCoordinates} from "./_locals/ExtractParticleCoordinates";
+import { ExtractParticleCoordinates } from "./_locals/ExtractParticleCoordinates";
+import { MeasureFps } from "../performance/MeasureFps";
 
 
 export class TextBlock {
@@ -155,6 +156,7 @@ export class TextBlock {
       e.preventDefault();
 
       if (e.button === 0) {
+        MeasureFps("textBlock");
         this.inkManager.provideInkTo(this);
       }
 

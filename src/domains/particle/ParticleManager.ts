@@ -19,6 +19,8 @@ export class ParticleManager {
 
   release(particle: Particle) {
     particle.node.style.opacity = (0).toString();
+//    particle.node.style.setProperty('--transformTo', `translate(100000px, 1000000px)`);
+
     particle.state = "pool";
     particle.node.classList.remove('moving');
     this.pool.add(particle);
@@ -48,7 +50,7 @@ export class ParticleManager {
       throw new Error("cant move particle twice");
     }
     particle.state = "moving";
-    particle.node.style.opacity = 1..toString();
+ //   particle.node.style.opacity = 1..toString();
     particle.node.style.setProperty('--transformFrom', `translate(${from.x}px, ${from.y}px)`);
     particle.node.style.setProperty('--transformTo', `translate(${to.x}px, ${to.y}px)`);
     particle.node.classList.add('moving');
@@ -59,18 +61,15 @@ export class ParticleManager {
         "animationend",
         () => {
           this.moveEventCount += 1;
+          res();
         },
         { once: true }
       );
-      setTimeout(() => {
-        this.moveFinishCount += 1;
-        res();
-      }, MOVE_TIME);
-    })
+    });
   }
 
 
-  private populateParticle() {
+   populateParticle(addAnimation = false) {
     const inkSize = 1;
     const node = document.createElement("div");
     node.classList.add("particle");
@@ -79,10 +78,25 @@ export class ParticleManager {
       `${inkSize / window.devicePixelRatio}px`
     );
 
+    if (addAnimation) {
+ //     node.style.setProperty(
+ //       "--transformFrom",
+ //       `translate(${Math.random() * 100}px, ${Math.random() * 100}px)`
+ //     );
+      node.style.setProperty(
+        "--transformTo",
+        `translate(${Math.random() * 100}px, ${Math.random() * 100}px)`
+      );
+      node.classList.add("idle");
+    }
+
     this.particleSpace.appendChild(node);
+    if (!addAnimation) {
+
     this.pool.add({
       node,
       state: "pool"
     });
+    }
   }
 }

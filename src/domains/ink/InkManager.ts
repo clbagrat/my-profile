@@ -1,8 +1,9 @@
 import { ParticleManager } from "../particle/ParticleManager";
+import {GetAverageFps} from "../performance/MeasureFps";
 import { Coordinate } from "../shared/types";
 import { TextBlock } from "../textBlock/TextBlock";
 
-const PARTICLE_STEP = 100;
+const PARTICLE_STEP = 10;
 const inkPlace: HTMLElement | null = document.querySelector('.ink');
 
 export class InkManager {
@@ -13,7 +14,7 @@ export class InkManager {
   }
 
   set currentInkAmount(value: number) {
-    (inkPlace as HTMLElement).innerHTML = value.toString();
+//    (inkPlace as HTMLElement).innerHTML = value.toString();
     this._currentInkAmount = value
   }
 
@@ -45,7 +46,12 @@ export class InkManager {
       });
       window.requestAnimationFrame(() => this.provideInkTo(textBlock));
     } else {
-      console.log("DONE")
+      setTimeout(() => {
+
+      const [fps] = GetAverageFps("textBlock");
+      document.body.innerHTML += `<br /> <br /><br />\n \n ${fps.toString()}`;
+      console.log("DONE", )
+      }, 1000);
     }
   }
 
