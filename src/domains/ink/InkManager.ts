@@ -1,10 +1,9 @@
 import { ParticleManager } from "../particle/ParticleManager";
-import {GetAverageFps} from "../performance/MeasureFps";
+import { GetAverageFps } from "../performance/MeasureFps";
 import { Coordinate } from "../shared/types";
 import { TextBlock } from "../textBlock/TextBlock";
 
 const PARTICLE_STEP = 10;
-const inkPlace: HTMLElement | null = document.querySelector('.ink');
 
 export class InkManager {
   private _currentInkAmount: number = 0;
@@ -14,8 +13,7 @@ export class InkManager {
   }
 
   set currentInkAmount(value: number) {
-//    (inkPlace as HTMLElement).innerHTML = value.toString();
-    this._currentInkAmount = value
+    this._currentInkAmount = value;
   }
 
   constructor(private particleManager: ParticleManager) {

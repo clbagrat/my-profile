@@ -2,6 +2,7 @@ import "./style.css";
 import { TextBlock } from "./domains/textBlock/TextBlock";
 import { InkManager } from "./domains/ink/InkManager";
 import { ParticleManager } from "./domains/particle/ParticleManager";
+import {InkContainer} from "./domains/ink/InkContainer";
 //import { GenerateParticleCoordinates, ParticleCoordinate } from "./domains/particle/GenerateParticleCoordinates";
 //import { CreateInkPixel } from "./domains/domElements/CreateInkPixel";
 //
@@ -123,9 +124,10 @@ const particlePlace = document.querySelector(".particlePlace") as HTMLElement;
 const particeManager = new ParticleManager(particlePlace, 2500);
 
 const inkManager = new InkManager(particeManager);
+const inkContainer = new InkContainer(inkManager, document.querySelector(".ink-container") as HTMLElement);
 
 const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
-console.log({ inkManager });
+console.log({ inkManager, inkContainer });
 textList.forEach((node: HTMLDivElement) => {
   console.log(new TextBlock(node, inkManager, particeManager));
 });

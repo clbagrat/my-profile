@@ -46,7 +46,6 @@ export class TextBlock {
       fontFamily,
       this.rect
     );
-    console.log({lettersPerRow});
 
     this.particleCoordList = particleCoordList;
     this.oneLetterWidth = oneLetterWidth;
@@ -129,7 +128,6 @@ export class TextBlock {
 
     const expectedRevealedLettersCount =
       Math.floor(x / this.oneLetterWidth) + prevRowLetters;
-    console.log(expectedRow, prevRowLetters, expectedRevealedLettersCount, this.fullText[expectedRevealedLettersCount]);
     const isLastLetter = this.fullLetterCount - this.revealedLetterCount === 1;
 
     if (

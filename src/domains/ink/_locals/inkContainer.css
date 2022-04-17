@@ -1,0 +1,38 @@
+.ink-container {
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  width: 100px;
+  height: 100px;
+}
+
+@keyframes idle {
+  0% {
+    transform: translate(calc(-50% + var(--startPointX)), calc(-50% + var(--startPointY))) rotate(0deg);
+  }
+  50% {
+    transform: translate(calc(-50% + var(--middlePointX)), calc(-50% + var(--middlePointY))) rotate(-270deg);
+  }
+  100% {
+    transform: translate(calc(-50% + var(--endPointX)), calc(-50% + var(--endPointY))) rotate(-360deg);
+  }
+}
+
+.ink-spot {
+  --scale: 1;
+  width: calc(70px * var(--scale));
+  height: calc(70px * var(--scale));
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 100px;
+  background: black;
+  position: absolute;
+  opacity: 0.5;
+  border: 1px solid #ccc;
+  transition: transform 0.1s;
+
+  animation: idle var(--time) infinite;
+  animation-direction: alternate;
+}
+
