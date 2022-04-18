@@ -33,7 +33,7 @@
 }
 
 .particle.moving {
-  animation: movement 1s ease-in-out;
+  animation: movement 0.8s ease-in-out;
   animation-direction: normal;
 }
 

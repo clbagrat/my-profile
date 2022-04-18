@@ -4,6 +4,7 @@ import { Coordinate } from "../shared/types";
 import { TextBlock } from "../textBlock/TextBlock";
 
 const PARTICLE_STEP = 10;
+const ANIMATE_EVERY = 1;
 
 export class InkManager {
   private _currentInkAmount: number = 0;
@@ -17,7 +18,7 @@ export class InkManager {
   }
 
   constructor(private particleManager: ParticleManager) {
-    this.currentInkAmount = 10000;
+    this.currentInkAmount = 100000;
   }
 
   provideInkTo(textBlock: TextBlock) {
@@ -27,27 +28,34 @@ export class InkManager {
 
     if (allocatedCount) {
       this.currentInkAmount -= allocatedCount;
-      allocatedParticlePlaces.forEach((destination: Coordinate) => {
+      for (let i = 0; i < allocatedParticlePlaces.length; i += ANIMATE_EVERY) {
+        const destination = allocatedParticlePlaces[i];
+        const from = {
+          x: destination.x + Math.random() * 200,
+          y: destination.y + (0.5 - Math.random()) * 80,
+        };
         const particle = this.particleManager.getParticleFromPool();
         this.particleManager
-          .moveParticle(
-            particle,
-            {
-              x: destination.x + Math.random() * 100,
-              y: destination.y + (0.5 - Math.random()) * 100,
-            },
-            destination
-          )
+          .moveParticle(particle, from, destination, true)
           .then(() => {
             textBlock.receiveParticle(particle);
+            for (let d = i + 1; d < Math.min(i + ANIMATE_EVERY, allocatedParticlePlaces.length); d += 1) {
+              textBlock.receiveParticleCoord(allocatedParticlePlaces[d]);
+//              const particle = this.particleManager.getParticleFromPool();
+//              this.particleManager
+//                .moveParticle(particle, from, allocatedParticlePlaces[d], false)
+//                .then(() => {
+//                  textBlock.receiveParticle(particle);
+//                });
+            }
           });
-      });
+      }
       window.requestAnimationFrame(() => this.provideInkTo(textBlock));
     } else {
       setTimeout(() => {
 
-      const [fps] = GetAverageFps("textBlock");
-      document.body.innerHTML += `<br /> <br /><br />\n \n ${fps.toString()}`;
+      const [fps, sum] = GetAverageFps("textBlock");
+      document.body.innerHTML += `<br /> <br /><br />\n \n ${fps.toString()} ${sum.toString()}`;
       console.log("DONE", )
       }, 1000);
     }

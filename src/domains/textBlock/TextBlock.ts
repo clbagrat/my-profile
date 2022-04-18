@@ -104,6 +104,11 @@ export class TextBlock {
 
     return res;
   }
+  receiveParticleCoord(coord: Coordinate) {
+    this.allocatedParticleCount -= 1;
+    this.takenParticleCount += 1;
+    this.handleParticleAmountChange();
+  }
 
   receiveParticle(particle: Particle) {
     this.allocatedParticleCount -= 1;
@@ -155,7 +160,6 @@ export class TextBlock {
   private updateText() {
     const currentText = this.fullText.slice(0, this.revealedLetterCount) + this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;")
     this.node.innerHTML = currentText;
-//    this.node.innerHTML = this.fullText
   }
 
   private assignEvents() {

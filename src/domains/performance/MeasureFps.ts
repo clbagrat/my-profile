@@ -28,15 +28,16 @@ export function MeasureFps (name: string) {
   }
 }
 
-export function GetAverageFps(name: string): [number, number[]] {
+export function GetAverageFps(name: string): [number, number, number[]] {
   if (!registeredMeasurers[name]) {
     throw new Error(`${name} measurer doesn't exist`);
   }
 
   const timestamps = registeredMeasurers[name];
   delete registeredMeasurers[name];
-  const average = timestamps.reduce((acc, cur) => acc + cur, 0) / timestamps.length;
+  const sum = timestamps.reduce((acc, cur) => acc + cur, 0)
+  const average =  sum/ timestamps.length;
   const fps = 1000 / average;
 
-  return [fps, timestamps];
+  return [fps, sum, timestamps];
 }

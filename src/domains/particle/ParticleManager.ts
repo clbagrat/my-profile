@@ -45,26 +45,33 @@ export class ParticleManager {
     particle: Particle,
     from: Coordinate,
     to: Coordinate,
+    playAnimation: boolean = true
   ): Promise<unknown> {
     if (particle.state === "moving") {
       throw new Error("cant move particle twice");
     }
     particle.state = "moving";
     particle.node.style.opacity = 1..toString();
-    particle.node.style.setProperty('--transformFrom', `translate(${from.x}px, ${from.y}px)`);
-    particle.node.style.setProperty('--transformTo', `translate(${to.x}px, ${to.y}px)`);
-    particle.node.classList.add('moving');
-    this.pool.delete(particle); 
-    this.moveStartCount += 1
+    particle.node.style.setProperty('--transformFrom', `translate(${from.x}px, ${from.y}px) scale(1)`);
+    particle.node.style.setProperty('--transformTo', `translate(${to.x}px, ${to.y}px) scale(0.8)`);
+    if (playAnimation) {
+      particle.node.classList.add("moving");
+    }
+    this.pool.delete(particle);
+    this.moveStartCount += 1;
     return new Promise<void>((res) => {
-      particle.node.addEventListener(
-        "animationend",
-        () => {
-          this.moveEventCount += 1;
-          res();
-        },
-        { once: true }
-      );
+      if (playAnimation) {
+        particle.node.addEventListener(
+          "animationend",
+          () => {
+            this.moveEventCount += 1;
+            res();
+          },
+          { once: true }
+        );
+      } else {
+        res();
+      }
     });
   }
 
