@@ -9,13 +9,6 @@ import {SquareBlock} from "./domains/inkBlock/SquareBlock";
 //
 //
 window.devicePixelRatio = 2;
-window.myTransform = { x: 0, y: 0 };
-//
-document.addEventListener("mousemove", (e) => {
-  window.myTransform.x = e.clientX;
-  window.myTransform.y = e.clientY;
-});
-//
 //const setPixelsInPlace = (pixels: HTMLDivElement[], wordCoords: ParticleCoordinate[], rect: DOMRect, reverse?: boolean) => {
 //  const nodes = pixels.splice(0, 120);
 //  const coords = wordCoords.splice(0, 120);
@@ -142,8 +135,10 @@ setTimeout(() => {
         textBlock.getMissingParticleAmount(),
         true
       );
-      console.log(squareblock)
       inkManager.register(squareblock);
+      textBlock.onFull(() => {
+        document.querySelector("[data-square]")?.remove();
+      })
     });
     });
   });

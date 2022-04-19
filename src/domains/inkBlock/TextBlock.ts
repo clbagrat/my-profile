@@ -71,6 +71,21 @@ export class TextBlock implements IInkBlock {
     });
   }
 
+  private onCompleteCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onComplete(callback: (ib: IInkBlock) => void): void {
+    this.onCompleteCallbacks.push(callback);
+  }
+
+  private onFullCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onFull(callback: (ib: IInkBlock) => void): void {
+    this.onFullCallbacks.push(callback);
+  }
+
+  private onEmptyCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onEmpty(callback: (ib: IInkBlock) => void): void {
+    this.onEmptyCallbacks.push(callback);
+  }
+
   getTakenParticleAmount(): number {
     return this.takenParticleCount;
   }
@@ -155,6 +170,18 @@ export class TextBlock implements IInkBlock {
 
   @InkBlockProgressDecorator
   private handleParticleAmountChange() {
+    if (this.takenParticleCount === 0) {
+      this.onEmptyCallbacks.forEach(c => c(this));
+    }
+
+    if (this.takenParticleCount === this.particleCount - this.allocatedParticleCount) {
+      this.onFullCallbacks.forEach(c => c(this));
+    }
+
+    if (this.takenParticleCount === this.particleCount) {
+      this.onCompleteCallbacks.forEach(c => c(this));
+    }
+
     const lastTakenParticleCoord = this.particleCoordList[
       this.takenParticleCount - 1
     ] || { x: 0, y: 0 };

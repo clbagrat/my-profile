@@ -5,7 +5,6 @@ import { CreateContext } from "./_locals/CreateContext";
 import {InkBlockProgressDecorator} from "./_locals/InkBlockProgressDecorator";
 
 export class SquareBlock implements IInkBlock {
-  private callbacks: ((ib: IInkBlock) => void)[] = [];
   private particleCoordList: Coordinate[] = []
   private particleCount = 0;
   private takenParticleCount = 0;
@@ -51,6 +50,22 @@ export class SquareBlock implements IInkBlock {
     return this.takenParticleCount;
   }
 
+  private onCompleteCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onComplete(callback: (ib: IInkBlock) => void): void {
+    this.onCompleteCallbacks.push(callback);
+  }
+
+  private onFullCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onFull(callback: (ib: IInkBlock) => void): void {
+    this.onFullCallbacks.push(callback);
+  }
+
+  private onEmptyCallbacks: ((tb: IInkBlock) => void)[] = [];
+  onEmpty(callback: (ib: IInkBlock) => void): void {
+    this.onEmptyCallbacks.push(callback);
+  }
+
+  private callbacks: ((ib: IInkBlock) => void)[] = [];
   onClick(callback: (inkBlock: IInkBlock) => void) {
     this.callbacks.push(callback);
   }
@@ -124,6 +139,17 @@ export class SquareBlock implements IInkBlock {
 
   @InkBlockProgressDecorator
   private handleParticleAmountChange() {
+    if (this.takenParticleCount === 0) {
+      this.onEmptyCallbacks.forEach(c => c(this));
+    }
+
+    if (this.takenParticleCount === this.particleCount - this.allocatedParticleCount) {
+      this.onFullCallbacks.forEach(c => c(this));
+    }
+
+    if (this.takenParticleCount === this.particleCount) {
+      this.onCompleteCallbacks.forEach(c => c(this));
+    }
     this.updateSquare();
   }
 
