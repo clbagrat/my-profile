@@ -7,16 +7,16 @@ import { IInkBlock } from "./IInkBlock";
 
 export class TextBlock implements IInkBlock {
   private particleCoordList: Coordinate[] = [];
-  private particleCount:number = 0;
-  private takenParticleCount: number = 0;
-  private allocatedParticleCount: number = 0;
+  private particleCount = 0;
+  private takenParticleCount = 0;
+  private allocatedParticleCount = 0;
   private particlesInPossession: Particle[] = [];
 
   private fullText: string;
   private fullLetterCount: number;
-  private revealedLetterCount: number = 0;
-  private oneLetterWidth: number = 0;
-  private oneLetterHeight: number = 0;
+  private revealedLetterCount = 0;
+  private oneLetterWidth = 0;
+  private oneLetterHeight = 0;
   private lettersPerRow: number[] = [];
 
   private rect: DOMRect = new DOMRect();

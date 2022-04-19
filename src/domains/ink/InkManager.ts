@@ -10,8 +10,8 @@ const ANIMATE_EVERY = 1;
 export class InkManager {
   private inkBlocks: IInkBlock[] = [];
   private inkBlockInProgress: IInkBlock | null = null;
-  private isInsta: boolean = false;
-  private isFast: boolean = false;
+  private isInsta = false;
+  private isFast = false;
   private movingParticles: Set<Particle> = new Set();
 
   constructor(private particleManager: ParticleManager) {

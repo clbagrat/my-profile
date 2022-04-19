@@ -36,7 +36,7 @@ export function ExtractParticleCoordinates(
   const textArray = text.split(" ");
   let lineCount = 0;
   let lastWordIndex = 0;
-  let charsPerRow: number[] = [];
+  const charsPerRow: number[] = [];
 
   for (let i = 0; i < textArray.length; i += 1) {
     const measure = context.measureText(

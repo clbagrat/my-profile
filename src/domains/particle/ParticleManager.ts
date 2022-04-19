@@ -46,7 +46,7 @@ export class ParticleManager {
     particle: Particle,
     from: Coordinate,
     to: Coordinate,
-    playAnimation: boolean = true
+    playAnimation = true
   ): Promise<unknown> {
     if (particle.state === "moving") {
       throw new Error("cant move particle twice");

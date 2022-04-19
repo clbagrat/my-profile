@@ -1,4 +1,4 @@
-export function GetTextOffset(font: string = "Fira Code") {
+export function GetTextOffset(font = "Fira Code") {
   const size = 32;
   const canvas = document.createElement("canvas");
   canvas.width = size;

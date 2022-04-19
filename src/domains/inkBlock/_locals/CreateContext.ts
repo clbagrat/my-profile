@@ -1,4 +1,4 @@
-export function CreateContext(width: number, height: number, ratio: number = 2): [CanvasRenderingContext2D, HTMLCanvasElement] {
+export function CreateContext(width: number, height: number, ratio = 2): [CanvasRenderingContext2D, HTMLCanvasElement] {
   const canvas: HTMLCanvasElement = document.createElement("canvas");
   const dpr = ratio;
   

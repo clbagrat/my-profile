@@ -6,9 +6,9 @@ import {CreateContext} from "./_locals/CreateContext";
 export class SquareBlock implements IInkBlock {
   private callbacks: ((ib: IInkBlock) => void)[] = [];
   private particleCoordList: Coordinate[] = []
-  private particleCount: number = 0;
-  private takenParticleCount: number = 0;
-  private allocatedParticleCount: number = 0;
+  private particleCount = 0;
+  private takenParticleCount = 0;
+  private allocatedParticleCount = 0;
   private particlesInPossession: Particle[] = [];
   private size: number;
   private context: CanvasRenderingContext2D;
