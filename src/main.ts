@@ -1,8 +1,9 @@
 import "./style.css";
-import { TextBlock } from "./domains/textBlock/TextBlock";
+import { TextBlock } from "./domains/inkBlock/TextBlock";
 import { InkManager } from "./domains/ink/InkManager";
 import { ParticleManager } from "./domains/particle/ParticleManager";
 import {InkContainer} from "./domains/ink/InkContainer";
+import {SquareBlock} from "./domains/inkBlock/SquareBlock";
 //import { GenerateParticleCoordinates, ParticleCoordinate } from "./domains/particle/GenerateParticleCoordinates";
 //import { CreateInkPixel } from "./domains/domElements/CreateInkPixel";
 //
@@ -124,13 +125,27 @@ const particlePlace = document.querySelector(".particlePlace") as HTMLElement;
 const particeManager = new ParticleManager(particlePlace, 2500);
 
 const inkManager = new InkManager(particeManager);
-const inkContainer = new InkContainer(inkManager, document.querySelector(".ink-container") as HTMLElement);
+//const inkContainer = new InkContainer(inkManager, document.querySelector(".ink-container") as HTMLElement);
 
-const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
-console.log({ inkManager, inkContainer });
-textList.forEach((node: HTMLDivElement) => {
-  console.log(new TextBlock(node, inkManager, particeManager));
-});
+setTimeout(() => {
+  const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
 
-window.particleManager = particeManager;
-window.inkManager = inkManager;
+  console.log({ inkManager });
+  textList.forEach((node: HTMLDivElement) => {
+    const textBlock = new TextBlock(node, particeManager);
+    console.log(textBlock)
+    inkManager.register(textBlock);
+    requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const squareblock = new SquareBlock(
+        document.querySelector("[data-square]") as HTMLElement,
+        textBlock.getMissingParticleAmount(),
+        true
+      );
+      console.log(squareblock)
+      inkManager.register(squareblock);
+    });
+    });
+  });
+
+}, 1000);

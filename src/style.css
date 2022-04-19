@@ -1,6 +1,7 @@
 html {
   overflow: hidden;
 }
+
 body {
   font-family: 'Fira Code', monospace; 
   -webkit-font-smoothing: antialiased;
@@ -8,7 +9,6 @@ body {
   color: #000;
   margin-top: 60px;
 }
-
 
 .text {
    position: absolute;
@@ -31,6 +31,7 @@ body {
   height: 1px;
   background: red;
 } 
+
 .ink {
   position: absolute;
 }
@@ -38,10 +39,16 @@ body {
 .center {
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .main-content {
-  max-width: 1000px;
-
+  max-width: 1000px; 
+  display: grid;
+  grid-template-columns: 50%;
+  justify-content: space-around;
+  align-items: start;
+  margin-bottom: 100px;
 }
 

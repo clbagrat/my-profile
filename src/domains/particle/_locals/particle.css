@@ -1,16 +1,10 @@
 @keyframes movement {
   0% {
     transform: var(--transformFrom);
-  },
-  100% {
-    transform: var(--transformTo);
   }
-}
-
-@keyframes idle {
-  0% {
-    transform: var(--transformFrom);
-  },
+  20% {
+    transform: var(--transformMiddle);
+  }
   100% {
     transform: var(--transformTo);
   }
@@ -26,15 +20,10 @@
   transform-origin: center center;
   transform: var(--transformTo);
   opacity: 1;
-
-}
-.particle.idle {
-  transition: transform 100s;
 }
 
 .particle.moving {
-  animation: movement 0.8s ease-in-out;
-  animation-direction: normal;
+  animation: movement 2s ease-in-out;
 }
 
 

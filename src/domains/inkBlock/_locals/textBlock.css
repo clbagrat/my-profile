@@ -1,0 +1,22 @@
+.text-block {
+  position: relative;
+}
+
+.text-block:hover {
+  outline: 3px solid rgba(255, 0, 0, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.text-block div {
+  position: absolute;
+  left:0;
+  top:0;
+  opacity: 0.5;
+  transition: opacity 1s;
+  z-index: -1;
+}
+.text-block div.animate {
+  opacity: 0;
+}
+

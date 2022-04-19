@@ -1,85 +1,121 @@
-import { ParticleManager } from "../particle/ParticleManager";
-import { GetAverageFps } from "../performance/MeasureFps";
+import { Particle, ParticleManager } from "../particle/ParticleManager";
+import { GetAverageFps, MeasureFps } from "../performance/MeasureFps";
 import { Coordinate } from "../shared/types";
-import { TextBlock } from "../textBlock/TextBlock";
+import { IInkBlock } from "../inkBlock/IInkBlock";
+import { shuffleArray } from "../shared/shuffleArray";
 
 const PARTICLE_STEP = 10;
 const ANIMATE_EVERY = 1;
 
 export class InkManager {
-  private _currentInkAmount: number = 0;
-
-  get currentInkAmount() {
-    return this._currentInkAmount;
-  }
-
-  set currentInkAmount(value: number) {
-    this._currentInkAmount = value;
-  }
+  private inkBlocks: IInkBlock[] = [];
+  private inkBlockInProgress: IInkBlock | null = null;
+  private isInsta: boolean = false;
+  private isFast: boolean = false;
+  private movingParticles: Set<Particle> = new Set();
 
   constructor(private particleManager: ParticleManager) {
-    this.currentInkAmount = 100000;
   }
 
-  provideInkTo(textBlock: TextBlock) {
-    const step = Math.min(PARTICLE_STEP, this.currentInkAmount);
-    const allocatedParticlePlaces = textBlock.allocateParticlePlaces(step);
+  register(inkBlock: IInkBlock) {
+    this.inkBlocks.push(inkBlock);
+    inkBlock.onClick(this.handleOnInkBlockClick.bind(this));
+  }
+
+  private handleOnInkBlockClick(ib: IInkBlock) {
+    if (this.inkBlockInProgress)  {
+      if (this.inkBlockInProgress === ib) {
+        if (this.isFast) {
+        [...this.movingParticles].forEach((p) => {
+          this.particleManager.finishParticle(p);
+        });
+        this.isInsta = true;
+
+        } else {
+          this.isFast = true;
+        }
+      }
+      return;
+    }
+    MeasureFps(this.inkBlocks.indexOf(ib).toString());
+    this.provideInkTo(ib);
+  }
+
+  getInkForInkBlock(inkBlock: IInkBlock, amount: number): Coordinate[] {
+    const res: Coordinate[] = [];
+    let needToCollect = amount;
+    const emptyBlocks = [inkBlock];
+
+    while(needToCollect && emptyBlocks.length !== this.inkBlocks.length) {
+      const blocks = shuffleArray([...this.inkBlocks.filter(ib => !emptyBlocks.includes(ib))]);
+      blocks.forEach((block) => {
+        const request = Math.floor(needToCollect / blocks.length);
+        const coordsFromBlock = block.wipeParticleAmount(request || needToCollect);
+        if (coordsFromBlock.length === 0) {
+          emptyBlocks.push(block);
+        }
+        needToCollect -= coordsFromBlock.length; 
+        res.push(...coordsFromBlock);
+      });
+    }
+    
+    return res;
+  }
+
+  provideInkTo(textBlock: IInkBlock) {
+    this.inkBlockInProgress = textBlock;
+    const step = this.isFast ? PARTICLE_STEP * 5 : PARTICLE_STEP;
+    const animateEvery = this.isFast ? ANIMATE_EVERY * 5 : ANIMATE_EVERY;
+    const providedInkCoords = this.getInkForInkBlock(
+      textBlock,
+      this.isInsta
+        ? textBlock.getMissingParticleAmount()
+        : Math.min(step, textBlock.getMissingParticleAmount())
+    );
+    const allocatedParticlePlaces = textBlock.allocateParticlePlaces(providedInkCoords.length);
     const allocatedCount = allocatedParticlePlaces.length;
 
     if (allocatedCount) {
-      this.currentInkAmount -= allocatedCount;
-      for (let i = 0; i < allocatedParticlePlaces.length; i += ANIMATE_EVERY) {
-        const destination = allocatedParticlePlaces[i];
-        const from = {
-          x: destination.x + Math.random() * 200,
-          y: destination.y + (0.5 - Math.random()) * 80,
-        };
-        const particle = this.particleManager.getParticleFromPool();
-        this.particleManager
-          .moveParticle(particle, from, destination, true)
-          .then(() => {
-            textBlock.receiveParticle(particle);
-            for (let d = i + 1; d < Math.min(i + ANIMATE_EVERY, allocatedParticlePlaces.length); d += 1) {
-              textBlock.receiveParticleCoord(allocatedParticlePlaces[d]);
-//              const particle = this.particleManager.getParticleFromPool();
-//              this.particleManager
-//                .moveParticle(particle, from, allocatedParticlePlaces[d], false)
-//                .then(() => {
-//                  textBlock.receiveParticle(particle);
-//                });
-            }
-          });
+      if (this.isInsta) {
+        for (let i = 0; i < allocatedParticlePlaces.length; i += 1) {
+          textBlock.receiveParticleCoord(allocatedParticlePlaces[i]);
+        }
+      } else {
+        for (
+          let i = 0;
+          i < allocatedParticlePlaces.length;
+          i += animateEvery
+        ) {
+          const destination = allocatedParticlePlaces[i];
+          const from = providedInkCoords[i];
+          const particle = this.particleManager.getParticleFromPool();
+          this.movingParticles.add(particle);
+          this.particleManager
+            .moveParticle(particle, from, destination, true)
+            .then(() => {
+              this.movingParticles.delete(particle);
+              textBlock.receiveParticle(particle);
+              for (
+                let d = i + 1;
+                d < Math.min(i + animateEvery, allocatedParticlePlaces.length);
+                d += 1
+              ) {
+                textBlock.receiveParticleCoord(allocatedParticlePlaces[d]);
+              }
+            });
+        }
       }
       window.requestAnimationFrame(() => this.provideInkTo(textBlock));
     } else {
-      setTimeout(() => {
-
-      const [fps, sum] = GetAverageFps("textBlock");
-      document.body.innerHTML += `<br /> <br /><br />\n \n ${fps.toString()} ${sum.toString()}`;
-      console.log("DONE", )
-      }, 1000);
-    }
-  }
-
-  consumeInkFrom(textBlock: TextBlock) {
-    const step = PARTICLE_STEP;
-    const particleCoordList = textBlock.wipeParticleAmount(step);
-
-    if (particleCoordList.length) {
-      particleCoordList.forEach((coord) => {
-        const particle = this.particleManager.getParticleFromPool();
-        this.particleManager
-          .moveParticle(particle, coord, {
-              x: window.myTransform.x + (0.5 - Math.random()) * 30,
-              y: window.myTransform.y + (0.5 - Math.random()) * 30,
-          })
-          .then(() => {
-            this.currentInkAmount += 1;
-            this.particleManager.release(particle);
-          });
-      });
-
-      window.requestAnimationFrame(() => this.consumeInkFrom(textBlock));
+      this.inkBlockInProgress = null;
+      this.isInsta = false;
+      this.isFast = false;
+      const [fps, time] = GetAverageFps(
+        this.inkBlocks.indexOf(textBlock).toString()
+      );
+      const node = document.createElement("div");
+      node.innerHTML = `${fps}, ${time}`;
+      document.body.appendChild(node);
     }
   }
 }

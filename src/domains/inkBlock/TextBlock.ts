@@ -1,14 +1,13 @@
 import "./_locals/textBlock.css";
 import { Coordinate } from "../shared/types";
-import { InkManager } from "../ink/InkManager";
 import { Particle, ParticleManager } from "../particle/ParticleManager";
 import { ExtractParticleCoordinates } from "./_locals/ExtractParticleCoordinates";
-import { MeasureFps } from "../performance/MeasureFps";
+import { IInkBlock } from "./IInkBlock";
 
 
-export class TextBlock {
+export class TextBlock implements IInkBlock {
   private particleCoordList: Coordinate[] = [];
-  private particleCount: number = 0;
+  private particleCount:number = 0;
   private takenParticleCount: number = 0;
   private allocatedParticleCount: number = 0;
   private particlesInPossession: Particle[] = [];
@@ -16,18 +15,22 @@ export class TextBlock {
   private fullText: string;
   private fullLetterCount: number;
   private revealedLetterCount: number = 0;
-  private oneLetterWidth;
-  private oneLetterHeight;
-  private lettersPerRow;
+  private oneLetterWidth: number = 0;
+  private oneLetterHeight: number = 0;
+  private lettersPerRow: number[] = [];
 
-  private rect: DOMRect;
+  private rect: DOMRect = new DOMRect();
 
   constructor(
     private node: HTMLElement,
-    private inkManager: InkManager,
-    private particleManager: ParticleManager
+    private particleManager: ParticleManager,
   ) {
-    const { text = "", font = "32", fontFamily = "Fira Code" } = node.dataset;
+    const {
+      text = "",
+      font = "32",
+      fontFamily = "Fira Code",
+      isComplete = "",
+    } = node.dataset;
 
     node.classList.add("text-block");
     node.style.fontSize = `${font}px`;
@@ -38,22 +41,40 @@ export class TextBlock {
     this.fullLetterCount = text.length;
     this.updateText();
 
-    this.rect = node.getBoundingClientRect();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+      this.rect = node.getBoundingClientRect();
 
-    const [particleCoordList, oneLetterWidth, lettersPerRow] = ExtractParticleCoordinates(
-      text,
-      parseInt(font, 10),
-      fontFamily,
-      this.rect
-    );
+      const [particleCoordList, oneLetterWidth, lettersPerRow] =
+        ExtractParticleCoordinates(
+          text,
+          parseInt(font, 10),
+          fontFamily,
+          this.rect
+        );
 
-    this.particleCoordList = particleCoordList;
-    this.oneLetterWidth = oneLetterWidth;
-    this.oneLetterHeight = parseInt(font, 10);
-    this.lettersPerRow = lettersPerRow;
-    this.particleCount = this.particleCoordList.length;
+      this.particleCoordList = particleCoordList;
+      this.oneLetterWidth = oneLetterWidth;
+      this.oneLetterHeight = parseInt(font, 10);
+      this.lettersPerRow = lettersPerRow;
+      this.particleCount = this.particleCoordList.length;
 
-    this.assignEvents();
+      if (isComplete) {
+        this.revealedLetterCount = this.fullText.length;
+        this.takenParticleCount = this.particleCoordList.length;
+        this.allocatedParticleCount = 0;
+        this.updateText();
+      }
+
+      this.assignEvents();
+      });
+    });
+  }
+
+  getMissingParticleAmount(): number {
+    const reservedParticlePlacesCount =
+      this.takenParticleCount + this.allocatedParticleCount;
+    return this.particleCount - reservedParticlePlacesCount;
   }
 
   allocateParticlePlaces(requestedAmountToAllocate: number): Coordinate[] {
@@ -104,6 +125,7 @@ export class TextBlock {
 
     return res;
   }
+
   receiveParticleCoord(coord: Coordinate) {
     this.allocatedParticleCount -= 1;
     this.takenParticleCount += 1;
@@ -116,6 +138,12 @@ export class TextBlock {
 
     this.particlesInPossession[this.takenParticleCount - 1] = particle;
     this.handleParticleAmountChange();
+  }
+
+  private callbacks: ((tb: TextBlock) => void)[] = [];
+
+  onClick(callback: (textBlock: TextBlock) => void) {
+    this.callbacks.push(callback);
   }
 
   private handleParticleAmountChange() {
@@ -159,24 +187,19 @@ export class TextBlock {
 
   private updateText() {
     const currentText = this.fullText.slice(0, this.revealedLetterCount) + this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;")
-    this.node.innerHTML = currentText;
+    const nextLetter = this.fullText.slice(0, this.revealedLetterCount + 1) + this.fullText.slice(this.revealedLetterCount + 1).replace(/\S/g, "&nbsp;")
+    this.node.innerHTML = `${currentText}<div>${nextLetter}</div>`
+    requestAnimationFrame(() => {
+      this.node.querySelector("div")?.classList.add("animate");
+    })
   }
 
   private assignEvents() {
-    this.node.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-    });
-
-    this.node.addEventListener("mousedown", (e: MouseEvent) => {
+    this.node.addEventListener("click", (e: MouseEvent) => {
       e.preventDefault();
 
       if (e.button === 0) {
-        MeasureFps("textBlock");
-        this.inkManager.provideInkTo(this);
-      }
-
-      if (e.button === 2) {
-        this.inkManager.consumeInkFrom(this);
+        this.callbacks.forEach(cb => cb(this))
       }
     });
   }

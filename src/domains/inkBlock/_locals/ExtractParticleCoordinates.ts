@@ -13,18 +13,25 @@ export function ExtractParticleCoordinates(
   rect: DOMRect,
 ): [Coordinate[], number, number[]] {
   const { width, height, x, y} = rect;
-  const context = CreateContext(width, height);
+  console.log({width, height})
+  const [context] = CreateContext(width, height, window.devicePixelRatio);
   const offsets = GetTextOffset(fontFamily);
 
   if (!context) {
     throw new Error("No context");
   }
 
+
   context.fillStyle = "white";
   context.fillRect(0, 0, width, height);
   context.font = `${fontSize}px '${fontFamily}'`;
   context.fillStyle = "black";
   context.textBaseline = "top";
+
+//  context.canvas.style.position = "absolute";
+//  context.canvas.style.left = rect.left + 'px';
+//  context.canvas.style.top = rect.top + 'px';
+//  document.body.appendChild(context.canvas);
 
   const textArray = text.split(" ");
   let lineCount = 0;
@@ -35,9 +42,10 @@ export function ExtractParticleCoordinates(
     const measure = context.measureText(
       textArray.slice(lastWordIndex, i + 1).join(" ")
     ).width;
-    const targetIndex = i === textArray.length - 1 ? i + 1 : i;
-    if (measure > width || i === textArray.length - 1) {
-      const textSlice = textArray.slice(lastWordIndex, targetIndex).join(" ") + ' ';
+
+    const targetIndex = i;
+    if (measure > width) {
+      const textSlice = textArray.slice(lastWordIndex, targetIndex).join(" ")+ ' ';
 
       context.fillText(
         textSlice,
@@ -46,11 +54,20 @@ export function ExtractParticleCoordinates(
           fontSize * LineHeightAdjustments +
           lineCount * fontSize
       );
+
       charsPerRow.push(textSlice.length);
       lastWordIndex = i;
       lineCount += 1;
     }
+
   }
+      context.fillText(
+        textArray.slice(lastWordIndex).join(" "),
+        0,
+        -offsets.y * (fontSize * 0.01) +
+          fontSize * LineHeightAdjustments +
+          lineCount * fontSize
+      );
 
 //  const oneLetterWidth = context.measureText('T').width;
 //  
