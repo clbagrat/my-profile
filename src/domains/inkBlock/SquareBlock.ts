@@ -1,7 +1,8 @@
 import { Particle } from "../particle/ParticleManager";
 import { Coordinate } from "../shared/types";
 import { IInkBlock } from "./IInkBlock";
-import {CreateContext} from "./_locals/CreateContext";
+import { CreateContext } from "./_locals/CreateContext";
+import {InkBlockProgressDecorator} from "./_locals/InkBlockProgressDecorator";
 
 export class SquareBlock implements IInkBlock {
   private callbacks: ((ib: IInkBlock) => void)[] = [];
@@ -14,7 +15,7 @@ export class SquareBlock implements IInkBlock {
   private context: CanvasRenderingContext2D;
   private rect: DOMRect = new DOMRect();
 
-  constructor(node:HTMLElement, particleCount: number, isComplete: boolean) {
+  constructor(public node:HTMLElement, particleCount: number, isComplete: boolean) {
     console.log({particleCount});
     this.particleCount = Math.pow(Math.ceil(Math.sqrt(particleCount)), 2);
     const w = Math.sqrt(this.particleCount);
@@ -40,6 +41,14 @@ export class SquareBlock implements IInkBlock {
     });
 
 
+  }
+
+  getParticleAmount(): number {
+    return this.particleCount;
+  }
+
+  getTakenParticleAmount(): number {
+    return this.takenParticleCount;
   }
 
   onClick(callback: (inkBlock: IInkBlock) => void) {
@@ -113,11 +122,9 @@ export class SquareBlock implements IInkBlock {
     this.handleParticleAmountChange();
   }
 
+  @InkBlockProgressDecorator
   private handleParticleAmountChange() {
     this.updateSquare();
-    if (this.takenParticleCount === 67) {
-      this.context.canvas.style.opacity = 0..toString();
-    }
   }
 
   private updateSquare() {

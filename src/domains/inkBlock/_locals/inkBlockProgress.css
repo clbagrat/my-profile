@@ -1,0 +1,35 @@
+.ink-block {
+  --progress: 0;
+  --offset: 6px;
+  position: relative;
+}
+.ink-block:hover {
+  outline-offset: var(--offset);
+  cursor: pointer;
+}
+
+.ink-block::before,
+.ink-block::after
+{
+  content: "";
+  position: absolute;
+  width: calc(100% + var(--offset) * 2);
+  height: 2px;
+  top: calc(var(--offset) * -1);
+  left: calc(var(--offset) * -1);
+  background: rgba(0, 0, 0, 0.1);
+  transition: opacity 0.5s, transform 0.1s;
+  opacity: 0.5;
+}
+
+.ink-block::after {
+  background: rgba(0, 0, 0, 0.2);
+  transform: scaleX(var(--progress));
+}
+
+.ink-block:hover::before,
+.ink-block:hover::after
+{
+  opacity: 1;
+}
+

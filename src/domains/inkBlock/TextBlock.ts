@@ -3,7 +3,7 @@ import { Coordinate } from "../shared/types";
 import { Particle, ParticleManager } from "../particle/ParticleManager";
 import { ExtractParticleCoordinates } from "./_locals/ExtractParticleCoordinates";
 import { IInkBlock } from "./IInkBlock";
-
+import { InkBlockProgressDecorator } from "./_locals/InkBlockProgressDecorator";
 
 export class TextBlock implements IInkBlock {
   private particleCoordList: Coordinate[] = [];
@@ -22,8 +22,8 @@ export class TextBlock implements IInkBlock {
   private rect: DOMRect = new DOMRect();
 
   constructor(
-    private node: HTMLElement,
-    private particleManager: ParticleManager,
+    public node: HTMLElement,
+    private particleManager: ParticleManager
   ) {
     const {
       text = "",
@@ -32,7 +32,7 @@ export class TextBlock implements IInkBlock {
       isComplete = "",
     } = node.dataset;
 
-    node.classList.add("text-block");
+    node.classList.add("text-block", "ink-block");
     node.style.fontSize = `${font}px`;
     node.style.fontFamily = fontFamily;
     node.style.lineHeight = `${font}px`;
@@ -43,32 +43,40 @@ export class TextBlock implements IInkBlock {
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-      this.rect = node.getBoundingClientRect();
+        this.rect = node.getBoundingClientRect();
 
-      const [particleCoordList, oneLetterWidth, lettersPerRow] =
-        ExtractParticleCoordinates(
-          text,
-          parseInt(font, 10),
-          fontFamily,
-          this.rect
-        );
+        const [particleCoordList, oneLetterWidth, lettersPerRow] =
+          ExtractParticleCoordinates(
+            text,
+            parseInt(font, 10),
+            fontFamily,
+            this.rect
+          );
 
-      this.particleCoordList = particleCoordList;
-      this.oneLetterWidth = oneLetterWidth;
-      this.oneLetterHeight = parseInt(font, 10);
-      this.lettersPerRow = lettersPerRow;
-      this.particleCount = this.particleCoordList.length;
+        this.particleCoordList = particleCoordList;
+        this.oneLetterWidth = oneLetterWidth;
+        this.oneLetterHeight = parseInt(font, 10);
+        this.lettersPerRow = lettersPerRow;
+        this.particleCount = this.particleCoordList.length;
 
-      if (isComplete) {
-        this.revealedLetterCount = this.fullText.length;
-        this.takenParticleCount = this.particleCoordList.length;
-        this.allocatedParticleCount = 0;
-        this.updateText();
-      }
+        if (isComplete) {
+          this.revealedLetterCount = this.fullText.length;
+          this.takenParticleCount = this.particleCoordList.length;
+          this.allocatedParticleCount = 0;
+          this.updateText();
+        }
 
-      this.assignEvents();
+        this.assignEvents();
       });
     });
+  }
+
+  getTakenParticleAmount(): number {
+    return this.takenParticleCount;
+  }
+
+  getParticleAmount(): number {
+    return this.particleCount;
   }
 
   getMissingParticleAmount(): number {
@@ -111,9 +119,8 @@ export class TextBlock implements IInkBlock {
       requestedAmountToWipe
     );
 
-
     for (
-      let i = this.takenParticleCount - 1 ;
+      let i = this.takenParticleCount - 1;
       i > this.takenParticleCount - 1 - particleAmoutToWipe;
       i -= 1
     ) {
@@ -140,12 +147,13 @@ export class TextBlock implements IInkBlock {
     this.handleParticleAmountChange();
   }
 
-  private callbacks: ((tb: TextBlock) => void)[] = [];
+  private callbacks: ((tb: IInkBlock) => void)[] = [];
 
-  onClick(callback: (textBlock: TextBlock) => void) {
+  onClick(callback: (textBlock: IInkBlock) => void) {
     this.callbacks.push(callback);
   }
 
+  @InkBlockProgressDecorator
   private handleParticleAmountChange() {
     const lastTakenParticleCoord = this.particleCoordList[
       this.takenParticleCount - 1
@@ -157,7 +165,6 @@ export class TextBlock implements IInkBlock {
     const prevRowLetters = this.lettersPerRow
       .slice(0, expectedRow)
       .reduce((acc, c) => c + acc, 0);
-
 
     const expectedRevealedLettersCount =
       Math.floor(x / this.oneLetterWidth) + prevRowLetters;
@@ -186,12 +193,18 @@ export class TextBlock implements IInkBlock {
   }
 
   private updateText() {
-    const currentText = this.fullText.slice(0, this.revealedLetterCount) + this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;")
-    const nextLetter = this.fullText.slice(0, this.revealedLetterCount + 1) + this.fullText.slice(this.revealedLetterCount + 1).replace(/\S/g, "&nbsp;")
-    this.node.innerHTML = `${currentText}<div>${nextLetter}</div>`
+    const currentText =
+      this.fullText.slice(0, this.revealedLetterCount) +
+      this.fullText.slice(this.revealedLetterCount).replace(/\S/g, "&nbsp;");
+    const nextLetter =
+      this.fullText.slice(0, this.revealedLetterCount + 1) +
+      this.fullText
+        .slice(this.revealedLetterCount + 1)
+        .replace(/\S/g, "&nbsp;");
+    this.node.innerHTML = `${currentText}<div>${nextLetter}</div>`;
     requestAnimationFrame(() => {
       this.node.querySelector("div")?.classList.add("animate");
-    })
+    });
   }
 
   private assignEvents() {
@@ -199,7 +212,7 @@ export class TextBlock implements IInkBlock {
       e.preventDefault();
 
       if (e.button === 0) {
-        this.callbacks.forEach(cb => cb(this))
+        this.callbacks.forEach((cb) => cb(this));
       }
     });
   }

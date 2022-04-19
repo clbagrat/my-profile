@@ -2,12 +2,6 @@
   position: relative;
 }
 
-.text-block:hover {
-  outline: 3px solid rgba(255, 0, 0, 0.4);
-  border-radius: 8px;
-  cursor: pointer;
-}
-
 .text-block div {
   position: absolute;
   left:0;
