@@ -1,8 +1,6 @@
 import { Coordinate } from "../shared/types";
 import "./_locals/particle.css";
 
-const MOVE_TIME = 1000;
-
 export type Particle = {
   node: HTMLElement;
   state: "pool" | "moving" | "occupied"

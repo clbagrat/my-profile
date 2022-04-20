@@ -122,6 +122,13 @@ export class TextBlock implements IInkBlock {
     return res;
   }
 
+  private releaseParticle(index: number) {
+    const p = this.particlesInPossession[index];
+    if (!p) return;
+    this.particleManager.release(p);
+    delete this.particlesInPossession[index];
+  }
+
   wipeParticleAmount(requestedAmountToWipe: number): Coordinate[] {
     const res: Coordinate[] = [];
 
@@ -140,6 +147,7 @@ export class TextBlock implements IInkBlock {
       i -= 1
     ) {
       res.push(this.particleCoordList[i]);
+      this.releaseParticle(i);
     }
 
     this.takenParticleCount -= particleAmoutToWipe;
@@ -208,11 +216,7 @@ export class TextBlock implements IInkBlock {
       }
 
       for (let i = 0; i < this.takenParticleCount; i += 1) {
-        const p = this.particlesInPossession[i];
-        if (p) {
-          this.particleManager.release(p);
-          delete this.particlesInPossession[i];
-        }
+        this.releaseParticle(i);
       }
 
       this.updateText();
