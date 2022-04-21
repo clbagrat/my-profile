@@ -6,7 +6,7 @@ import {InkBlockProgressDecorator} from "./_locals/InkBlockProgressDecorator";
 import "./_locals/squareBlock.css";
 
 export class SquareBlock implements IInkBlock {
-  private particleCoordList: Coordinate[] = []
+  private particleCoordList: Coordinate[] = [];
   private particleCount = 0;
   private takenParticleCount = 0;
   private allocatedParticleCount = 0;
@@ -15,14 +15,19 @@ export class SquareBlock implements IInkBlock {
   private canvas: HTMLElement;
   private rect: DOMRect = new DOMRect();
 
-  constructor(public node:HTMLElement, private particleManager: ParticleManager, particleCount: number, isComplete: boolean) {
+  constructor(
+    public node: HTMLElement,
+    private particleManager: ParticleManager,
+    particleCount: number,
+    isComplete: boolean
+  ) {
     this.particleCount = Math.pow(Math.ceil(Math.sqrt(particleCount)), 2);
     const w = Math.sqrt(this.particleCount);
     const [context, canvas] = CreateContext(w, w, window.devicePixelRatio);
     this.context = context;
     this.size = w;
     this.canvas = canvas;
-    this.canvas.classList.add('square-block');
+    this.canvas.classList.add("square-block");
     node.appendChild(canvas);
 
     requestAnimationFrame(() => {
@@ -31,24 +36,22 @@ export class SquareBlock implements IInkBlock {
         this.takenParticleCount = this.particleCount;
       }
 
-      this.updateSquare();
+      this.updateSquare("full");
       this.addListener();
     });
-
-
   }
 
   recalculate(): void {
-      this.rect = this.canvas.getBoundingClientRect()
-      this.rect.x = window.scrollX + this.rect.x;
-      this.rect.y = window.scrollY + this.rect.y;
-      const w = Math.sqrt(this.particleCount);
-      this.particleCoordList = [];
-      for (let y = 0; y < w; y += 1) {
-        for (let x = 0; x < w; x += 1) {
-          this.particleCoordList.push({ x: x + this.rect.x, y: y + this.rect.y });
-        }
+    this.rect = this.canvas.getBoundingClientRect();
+    this.rect.x = window.scrollX + this.rect.x;
+    this.rect.y = window.scrollY + this.rect.y;
+    const w = Math.sqrt(this.particleCount);
+    this.particleCoordList = [];
+    for (let y = 0; y < w; y += 1) {
+      for (let x = 0; x < w; x += 1) {
+        this.particleCoordList.push({ x: x + this.rect.x, y: y + this.rect.y });
       }
+    }
   }
 
   getParticleAmount(): number {
@@ -80,7 +83,9 @@ export class SquareBlock implements IInkBlock {
   }
 
   getMissingParticleAmount(): number {
-    return this.particleCount - this.allocatedParticleCount - this.takenParticleCount;
+    return (
+      this.particleCount - this.allocatedParticleCount - this.takenParticleCount
+    );
   }
 
   allocateParticlePlaces(requestedAmountToAllocate: number): Coordinate[] {
@@ -118,85 +123,110 @@ export class SquareBlock implements IInkBlock {
       requestedAmountToWipe
     );
 
+    const takenCount = this.takenParticleCount;
 
     for (
-      let i = this.takenParticleCount - 1 ;
-      i > this.takenParticleCount - 1 - particleAmoutToWipe;
+      let i = takenCount - 1;
+      i > takenCount - 1 - particleAmoutToWipe;
       i -= 1
     ) {
       res.push(this.particleCoordList[i]);
+      this.takenParticleCount -= 1;
+      this.handleParticleAmountChange(-1);
     }
 
-    this.takenParticleCount -= particleAmoutToWipe;
-    this.handleParticleAmountChange();
     return res;
   }
 
   receiveParticleCoord(coord: Coordinate): void {
     this.allocatedParticleCount -= 1;
     this.takenParticleCount += 1;
-    this.handleParticleAmountChange();
+    this.handleParticleAmountChange(1);
   }
 
   receiveParticle(particle: Particle): void {
     this.allocatedParticleCount -= 1;
     this.takenParticleCount += 1;
 
-    this.handleParticleAmountChange();
+    this.handleParticleAmountChange(1);
     this.particleManager.release(particle);
   }
 
   @InkBlockProgressDecorator
-  private handleParticleAmountChange() {
+  private handleParticleAmountChange(diff: number) {
     if (this.takenParticleCount === 0) {
-      this.onEmptyCallbacks.forEach(c => c(this));
+      this.onEmptyCallbacks.forEach((c) => c(this));
     }
 
-    if (this.takenParticleCount === this.particleCount - this.allocatedParticleCount) {
-      this.onFullCallbacks.forEach(c => c(this));
+    if (
+      this.takenParticleCount ===
+      this.particleCount - this.allocatedParticleCount
+    ) {
+      this.onFullCallbacks.forEach((c) => c(this));
     }
 
     if (this.takenParticleCount === this.particleCount) {
-      this.onCompleteCallbacks.forEach(c => c(this));
+      this.onCompleteCallbacks.forEach((c) => c(this));
     }
-    this.updateSquare();
+    if (diff > 0) {
+      this.updateSquare("add");
+    } else {
+      this.updateSquare("remove");
+    }
   }
 
   private addListener() {
-    this.canvas.addEventListener('click', () => {
-      this.callbacks.forEach(cb => cb(this));
-    })
+    this.canvas.addEventListener("click", () => {
+      this.callbacks.forEach((cb) => cb(this));
+    });
   }
 
-  private updateSquare() {
+  private updateSquare(type: "full" | "add" | "remove") {
     this.context.fillStyle = "black";
-    if (this.takenParticleCount > this.particleCount / 2) {
-      this.context.fillRect(0, 0, this.size, this.size);
-      for (let i = this.takenParticleCount - 1; i < this.particleCount; i += 1) {
-        const coord = this.particleCoordList[i];
-        this.context.clearRect(
-          coord.x - this.rect.x,
-          coord.y - this.rect.y,
-          1,
-          1
-        );
-      }
-    } else {
-      this.context.clearRect(0, 0, this.size, this.size);
+    if (type === "add") {
+      const coord = this.particleCoordList[this.takenParticleCount - 1];
+      this.context.fillRect(coord.x - this.rect.x, coord.y - this.rect.y, 1, 1);
+    }
 
-      for (let i = 0; i < this.particleCount; i += 1) {
-        if (i >= this.takenParticleCount) {
-          break;
-        }
-        const coord = this.particleCoordList[i];
-        this.context.fillRect(
-          coord.x - this.rect.x,
-          coord.y - this.rect.y,
-          1,
-          1
-        );
+    if (type === "remove") {
+      const coord = this.particleCoordList[this.takenParticleCount - 1];
+      if (coord) {
+        this.context.clearRect(coord.x - this.rect.x, coord.y - this.rect.y, 1, 1);
       }
     }
 
+    if (type === "full") {
+      if (this.takenParticleCount > this.particleCount / 2) {
+        this.context.fillRect(0, 0, this.size, this.size);
+        for (
+          let i = this.takenParticleCount - 1;
+          i < this.particleCount;
+          i += 1
+        ) {
+          const coord = this.particleCoordList[i];
+          this.context.clearRect(
+            coord.x - this.rect.x,
+            coord.y - this.rect.y,
+            1,
+            1
+          );
+        }
+      } else {
+        this.context.clearRect(0, 0, this.size, this.size);
+
+        for (let i = 0; i < this.particleCount; i += 1) {
+          if (i >= this.takenParticleCount) {
+            break;
+          }
+          const coord = this.particleCoordList[i];
+          this.context.fillRect(
+            coord.x - this.rect.x,
+            coord.y - this.rect.y,
+            1,
+            1
+          );
+        }
+      }
+    }
   }
 }

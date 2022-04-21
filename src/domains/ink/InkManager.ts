@@ -17,6 +17,10 @@ export class InkManager {
   constructor(private particleManager: ParticleManager) {
   }
 
+  isBusy(): boolean {
+    return !!this.inkBlockInProgress;
+  }
+
   register(inkBlock: IInkBlock) {
     this.inkBlocks.push(inkBlock);
     inkBlock.onClick(this.handleOnInkBlockClick.bind(this));
@@ -63,12 +67,17 @@ export class InkManager {
       const blocks = shuffleArray([...this.inkBlocks.filter(ib => !emptyBlocks.includes(ib)).slice(0, 5)]);
       blocks.forEach((block) => {
         const request = Math.floor(needToCollect / blocks.length);
-        const coordsFromBlock = block.wipeParticleAmount(request || needToCollect);
-        if (coordsFromBlock.length === 0) {
-          emptyBlocks.push(block);
+        const finalAmount = request || needToCollect;
+        if (finalAmount > 0) {
+          const coordsFromBlock = block.wipeParticleAmount(
+           finalAmount 
+          );
+          if (coordsFromBlock.length === 0) {
+            emptyBlocks.push(block);
+          }
+          needToCollect -= coordsFromBlock.length;
+          res.push(...coordsFromBlock);
         }
-        needToCollect -= coordsFromBlock.length; 
-        res.push(...coordsFromBlock);
       });
     }
     
@@ -123,12 +132,10 @@ export class InkManager {
       this.inkBlockInProgress = null;
       this.isInsta = false;
       this.isFast = false;
-      const [fps, time] = GetAverageFps(
+      const [fps] = GetAverageFps(
         this.inkBlocks.indexOf(textBlock).toString()
       );
-      const node = document.createElement("div");
-      node.innerHTML = `${fps}, ${time}`;
-      document.body.appendChild(node);
+      console.log("average fps", fps);
     }
   }
 }

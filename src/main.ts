@@ -6,7 +6,7 @@ import { RunIntroExperience } from "./domains/profileExperience/IntroExperience"
 import {RunMainExperience} from "./domains/profileExperience/MainExperience";
 import {Grid} from "./domains/profileExperience/Grid";
 
-window.devicePixelRatio = 2;
+//window.devicePixelRatio = 2;
 const particlePlace = document.querySelector(".particlePlace") as HTMLElement;
 const particeManager = new ParticleManager(particlePlace, 2500);
 const inkManager = new InkManager(particeManager);
@@ -30,27 +30,3 @@ window.addEventListener("resize", () => {
   });
 });
 
-
-//setTimeout(() => {
-//  const textList = document.querySelectorAll<HTMLDivElement>("[data-text]");
-//
-//  console.log({ inkManager });
-//  textList.forEach((node: HTMLDivElement) => {
-//    const textBlock = TextBlock.CreateFromNode(node, particeManager);
-//    inkManager.register(textBlock);
-//    requestAnimationFrame(() => {
-//    requestAnimationFrame(() => {
-//      const squareblock = new SquareBlock(
-//        document.querySelector("[data-square]") as HTMLElement,
-//        textBlock.getMissingParticleAmount(),
-//        true
-//      );
-//      inkManager.register(squareblock);
-//      textBlock.onFull(() => {
-//        document.querySelector("[data-square]")?.remove();
-//      })
-//    });
-//    });
-//  });
-//
-//}, 1000);

@@ -31,7 +31,6 @@ export class ImageBlock implements IInkBlock {
         image.height,
         window.devicePixelRatio
       );
-      console.log(image.width)
       this.context = context;
       this.canvas = canvas;
       this.canvas.classList.add("square-block");

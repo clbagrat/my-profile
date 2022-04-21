@@ -63,12 +63,15 @@ export class TextBlock implements IInkBlock {
           this.fontFamily,
           this.rect
         );
-
       this.particleCoordList = particleCoordList;
       this.oneLetterWidth = oneLetterWidth;
       this.oneLetterHeight = parseInt(this.font, 10);
       this.lettersPerRow = lettersPerRow;
       this.particleCount = this.particleCoordList.length;
+
+      if (this.takenParticleCount > this.particleCount) {
+        this.takenParticleCount = this.particleCount;
+      }
   }
 
   private onCompleteCallbacks: ((tb: IInkBlock) => void)[] = [];

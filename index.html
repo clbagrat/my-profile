@@ -7,6 +7,7 @@
         <script>
           window.fontLoaded = new Promise((res) => {
             document.fonts.onloadingdone = res;
+            setTimeout(res, 3000);
           });
         </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">

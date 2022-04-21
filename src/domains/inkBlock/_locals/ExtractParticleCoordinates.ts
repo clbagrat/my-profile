@@ -4,7 +4,7 @@ import { GetTextOffset } from "./GetTextOffset";
 import { PixelIterator } from "./PixelIterator";
 
 //TODO: make LineHeightAdjustments depend on a browser UA
-const LineHeightAdjustments= 0.11;
+const LineHeightAdjustments= 0.13;
 
 export function ExtractParticleCoordinates(
   text: string,
