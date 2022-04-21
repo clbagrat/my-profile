@@ -13,7 +13,6 @@ export function ExtractParticleCoordinates(
   rect: DOMRect,
 ): [Coordinate[], number, number[]] {
   const { width, height, x, y} = rect;
-  console.log({width, height})
   const [context] = CreateContext(width, height, window.devicePixelRatio);
   const offsets = GetTextOffset(fontFamily);
 
@@ -27,11 +26,6 @@ export function ExtractParticleCoordinates(
   context.font = `${fontSize}px '${fontFamily}'`;
   context.fillStyle = "black";
   context.textBaseline = "top";
-
-//  context.canvas.style.position = "absolute";
-//  context.canvas.style.left = rect.left + 'px';
-//  context.canvas.style.top = rect.top + 'px';
-//  document.body.appendChild(context.canvas);
 
   const textArray = text.split(" ");
   let lineCount = 0;

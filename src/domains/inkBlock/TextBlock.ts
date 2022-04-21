@@ -23,15 +23,12 @@ export class TextBlock implements IInkBlock {
 
   constructor(
     public node: HTMLElement,
-    private particleManager: ParticleManager
+    private particleManager: ParticleManager,
+    private text: string,
+    private font: string,
+    private fontFamily: string,
+    private isComplete: boolean
   ) {
-    const {
-      text = "",
-      font = "32",
-      fontFamily = "Fira Code",
-      isComplete = "",
-    } = node.dataset;
-
     node.classList.add("text-block", "ink-block");
     node.style.fontSize = `${font}px`;
     node.style.fontFamily = fontFamily;
@@ -42,33 +39,36 @@ export class TextBlock implements IInkBlock {
     this.updateText();
 
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        this.rect = node.getBoundingClientRect();
+      this.recalculate();
 
-        const [particleCoordList, oneLetterWidth, lettersPerRow] =
-          ExtractParticleCoordinates(
-            text,
-            parseInt(font, 10),
-            fontFamily,
-            this.rect
-          );
+      if (isComplete) {
+        this.revealedLetterCount = this.fullText.length;
+        this.takenParticleCount = this.particleCoordList.length;
+        this.allocatedParticleCount = 0;
+        this.updateText();
+      }
 
-        this.particleCoordList = particleCoordList;
-        this.oneLetterWidth = oneLetterWidth;
-        this.oneLetterHeight = parseInt(font, 10);
-        this.lettersPerRow = lettersPerRow;
-        this.particleCount = this.particleCoordList.length;
-
-        if (isComplete) {
-          this.revealedLetterCount = this.fullText.length;
-          this.takenParticleCount = this.particleCoordList.length;
-          this.allocatedParticleCount = 0;
-          this.updateText();
-        }
-
-        this.assignEvents();
-      });
+      this.assignEvents();
     });
+  }
+  recalculate(): void {
+      this.rect = this.node.getBoundingClientRect();
+      this.rect.x = window.scrollX + this.rect.x;
+      this.rect.y = window.scrollY + this.rect.y;
+
+      const [particleCoordList, oneLetterWidth, lettersPerRow] =
+        ExtractParticleCoordinates(
+          this.text,
+          parseInt(this.font, 10),
+          this.fontFamily,
+          this.rect
+        );
+
+      this.particleCoordList = particleCoordList;
+      this.oneLetterWidth = oneLetterWidth;
+      this.oneLetterHeight = parseInt(this.font, 10);
+      this.lettersPerRow = lettersPerRow;
+      this.particleCount = this.particleCoordList.length;
   }
 
   private onCompleteCallbacks: ((tb: IInkBlock) => void)[] = [];
@@ -179,15 +179,21 @@ export class TextBlock implements IInkBlock {
   @InkBlockProgressDecorator
   private handleParticleAmountChange() {
     if (this.takenParticleCount === 0) {
-      this.onEmptyCallbacks.forEach(c => c(this));
+      this.onEmptyCallbacks.forEach((c) => c(this));
+      this.onEmptyCallbacks = [];
     }
 
-    if (this.takenParticleCount === this.particleCount - this.allocatedParticleCount) {
-      this.onFullCallbacks.forEach(c => c(this));
+    if (
+      this.takenParticleCount ===
+      this.particleCount - this.allocatedParticleCount
+    ) {
+      this.onFullCallbacks.forEach((c) => c(this));
+      this.onFullCallbacks = [];
     }
 
     if (this.takenParticleCount === this.particleCount) {
-      this.onCompleteCallbacks.forEach(c => c(this));
+      this.onCompleteCallbacks.forEach((c) => c(this));
+      this.onCompleteCallbacks = [];
     }
 
     const lastTakenParticleCoord = this.particleCoordList[

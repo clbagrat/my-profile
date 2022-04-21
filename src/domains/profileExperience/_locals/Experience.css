@@ -1,0 +1,13 @@
+.invisible-button {
+  background: transparent;
+  width: 100px;
+  height: 30px;
+  pointer-events: none;
+  border: 0;
+  outline: 0;
+}
+
+.invisible-button:focus {
+  pointer-events: unset;
+  outline: 3px solid rgba(0, 0, 144, 0.5);
+}

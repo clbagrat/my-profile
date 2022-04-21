@@ -21,6 +21,14 @@ export class InkManager {
     this.inkBlocks.push(inkBlock);
     inkBlock.onClick(this.handleOnInkBlockClick.bind(this));
   }
+  
+  unregister(inkBlock: IInkBlock) {
+    this.inkBlocks = this.inkBlocks.filter(ib => ib !== inkBlock);
+  }
+
+  recalculateAll() {
+    this.inkBlocks.forEach(ib => ib.recalculate());
+  }
 
   private handleOnInkBlockClick(ib: IInkBlock) {
     if (this.inkBlockInProgress)  {

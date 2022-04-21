@@ -14,4 +14,5 @@ export interface IInkBlock {
   wipeParticleAmount(requestedAmountToWipe: number): Coordinate[];
   receiveParticleCoord(coord: Coordinate): void;
   receiveParticle(particle: Particle): void;
+  recalculate(): void;
 }

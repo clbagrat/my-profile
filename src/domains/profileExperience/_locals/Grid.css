@@ -1,0 +1,24 @@
+.grid {
+
+  max-width: 1000px; 
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 200px auto 200px;
+  align-items: start;
+  margin-top: 30px;
+  justify-items: center;
+  grid-gap: 20px;
+
+}
+
+.grid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid > div > div {
+  width: fit-content;
+  margin-bottom: 30px;
+  align-self: center;
+}

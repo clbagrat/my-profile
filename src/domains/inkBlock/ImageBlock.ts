@@ -2,53 +2,66 @@ import { Particle, ParticleManager } from "../particle/ParticleManager";
 import { Coordinate } from "../shared/types";
 import { IInkBlock } from "./IInkBlock";
 import { CreateContext } from "./_locals/CreateContext";
+import {ExtractParticleCoordinatesFromImage} from "./_locals/ExtractParticleCoordinateFromImage";
+import {GetImageData} from "./_locals/GetImageData";
 import {InkBlockProgressDecorator} from "./_locals/InkBlockProgressDecorator";
 import "./_locals/squareBlock.css";
 
-export class SquareBlock implements IInkBlock {
-  private particleCoordList: Coordinate[] = []
+export class ImageBlock implements IInkBlock {
+  private particleCoordList: Coordinate[] = [];
   private particleCount = 0;
   private takenParticleCount = 0;
   private allocatedParticleCount = 0;
-  private size: number;
-  private context: CanvasRenderingContext2D;
-  private canvas: HTMLElement;
+  private context: CanvasRenderingContext2D | undefined;
+  private canvas: HTMLElement | undefined;
   private rect: DOMRect = new DOMRect();
+  private image: HTMLImageElement;
 
-  constructor(public node:HTMLElement, private particleManager: ParticleManager, particleCount: number, isComplete: boolean) {
-    this.particleCount = Math.pow(Math.ceil(Math.sqrt(particleCount)), 2);
-    const w = Math.sqrt(this.particleCount);
-    const [context, canvas] = CreateContext(w, w, window.devicePixelRatio);
-    this.context = context;
-    this.size = w;
-    this.canvas = canvas;
-    this.canvas.classList.add('square-block');
-    node.appendChild(canvas);
+  constructor(
+    public node: HTMLElement,
+    private particleManager: ParticleManager,
+    imageBase64: string,
+    isComplete: boolean
+  ) {
+    const image = GetImageData(imageBase64);
+    this.image = image;
+    image.onload = () => {
+      const [context, canvas] = CreateContext(
+        image.width,
+        image.height,
+        window.devicePixelRatio
+      );
+      console.log(image.width)
+      this.context = context;
+      this.canvas = canvas;
+      this.canvas.classList.add("square-block");
+      node.appendChild(canvas);
 
-    requestAnimationFrame(() => {
-      this.recalculate();
-      if (isComplete) {
-        this.takenParticleCount = this.particleCount;
-      }
+      requestAnimationFrame(() => {
+        this.recalculate();
+        if (isComplete) {
+          this.takenParticleCount = this.particleCount;
+        }
 
-      this.updateSquare();
-      this.addListener();
-    });
-
-
+        this.addListener();
+      });
+    };
   }
 
   recalculate(): void {
-      this.rect = this.canvas.getBoundingClientRect()
-      this.rect.x = window.scrollX + this.rect.x;
-      this.rect.y = window.scrollY + this.rect.y;
-      const w = Math.sqrt(this.particleCount);
-      this.particleCoordList = [];
-      for (let y = 0; y < w; y += 1) {
-        for (let x = 0; x < w; x += 1) {
-          this.particleCoordList.push({ x: x + this.rect.x, y: y + this.rect.y });
-        }
-      }
+    if (!this.canvas || !this.context) {
+      return
+    }
+    this.rect = this.canvas.getBoundingClientRect();
+    this.rect.x = window.scrollX + this.rect.x;
+    this.rect.y = window.scrollY + this.rect.y;
+    this.particleCoordList = ExtractParticleCoordinatesFromImage(
+      this.context,
+      this.image,
+      this.rect
+    );
+    this.particleCount = this.particleCoordList.length;
+    this.updateSquare();
   }
 
   getParticleAmount(): number {
@@ -80,7 +93,9 @@ export class SquareBlock implements IInkBlock {
   }
 
   getMissingParticleAmount(): number {
-    return this.particleCount - this.allocatedParticleCount - this.takenParticleCount;
+    return (
+      this.particleCount - this.allocatedParticleCount - this.takenParticleCount
+    );
   }
 
   allocateParticlePlaces(requestedAmountToAllocate: number): Coordinate[] {
@@ -118,9 +133,8 @@ export class SquareBlock implements IInkBlock {
       requestedAmountToWipe
     );
 
-
     for (
-      let i = this.takenParticleCount - 1 ;
+      let i = this.takenParticleCount - 1;
       i > this.takenParticleCount - 1 - particleAmoutToWipe;
       i -= 1
     ) {
@@ -141,62 +155,48 @@ export class SquareBlock implements IInkBlock {
   receiveParticle(particle: Particle): void {
     this.allocatedParticleCount -= 1;
     this.takenParticleCount += 1;
-
     this.handleParticleAmountChange();
-    this.particleManager.release(particle);
+    this.particleManager.release(particle)
   }
 
   @InkBlockProgressDecorator
   private handleParticleAmountChange() {
     if (this.takenParticleCount === 0) {
-      this.onEmptyCallbacks.forEach(c => c(this));
+      this.onEmptyCallbacks.forEach((c) => c(this));
     }
 
-    if (this.takenParticleCount === this.particleCount - this.allocatedParticleCount) {
-      this.onFullCallbacks.forEach(c => c(this));
+    if (
+      this.takenParticleCount ===
+      this.particleCount - this.allocatedParticleCount
+    ) {
+      this.onFullCallbacks.forEach((c) => c(this));
     }
 
     if (this.takenParticleCount === this.particleCount) {
-      this.onCompleteCallbacks.forEach(c => c(this));
+      this.onCompleteCallbacks.forEach((c) => c(this));
     }
     this.updateSquare();
   }
 
   private addListener() {
-    this.canvas.addEventListener('click', () => {
-      this.callbacks.forEach(cb => cb(this));
-    })
+    this.canvas?.addEventListener("click", () => {
+      this.callbacks.forEach((cb) => cb(this));
+    });
   }
 
   private updateSquare() {
+    if (!this.context) {return}
     this.context.fillStyle = "black";
-    if (this.takenParticleCount > this.particleCount / 2) {
-      this.context.fillRect(0, 0, this.size, this.size);
-      for (let i = this.takenParticleCount - 1; i < this.particleCount; i += 1) {
-        const coord = this.particleCoordList[i];
-        this.context.clearRect(
-          coord.x - this.rect.x,
-          coord.y - this.rect.y,
-          1,
-          1
-        );
-      }
-    } else {
-      this.context.clearRect(0, 0, this.size, this.size);
-
-      for (let i = 0; i < this.particleCount; i += 1) {
-        if (i >= this.takenParticleCount) {
-          break;
-        }
-        const coord = this.particleCoordList[i];
+    this.context.clearRect(0, 0, 1000, 1000);
+    for (let i = 0; i < this.takenParticleCount; i += 1) {
+      const coord = this.particleCoordList[i];
         this.context.fillRect(
           coord.x - this.rect.x,
           coord.y - this.rect.y,
           1,
           1
         );
-      }
-    }
 
+    }
   }
 }
