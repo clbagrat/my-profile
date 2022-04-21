@@ -2,9 +2,10 @@ import { InkManager } from "../ink/InkManager";
 import { ParticleManager } from "../particle/ParticleManager";
 import { InkBlockCreatorFactory } from "./_locals/PopulateInkBlock";
 import text from "./_locals/MainText.json";
-import { Grid } from "./Grid";
+import { CellLocation, Grid } from "./Grid";
 import "./_locals/Experience.css";
 import {image} from "./_locals/image.json";
+import {IInkBlock} from "../inkBlock/IInkBlock";
 
 export const RunMainExperience = (
   particleManager: ParticleManager,
@@ -84,12 +85,12 @@ export const RunMainExperience = (
                     );
                     console.log(
                       "%c I did all the hacking for you and discovered this method: InkMachine_GiveMeSecretLine()",
-                      "color: blue"
+                      "color: green"
                     );
                     window.InkMachine_GiveMeSecretLine = () => {
                       create(grid.get("leftBottom"), {
                         type: "TextBlock",
-                        text: "Tssssss. This is very secret message. I really wanted you to question - How did he do this animation? Well, if I succeed and you're interested, i suggest to visit this https://github.com/clbagrat/ink",
+                        text: "Tssssss. This is very secret message. I really wanted you to question - How did he do this animation? Well, if I succeed and you're interested, i suggest to visit this https://github.com/clbagrat/my-profile",
                         fontSize: "14",
                         fontFamily: "Fira Code",
                         isComplete: true,
@@ -98,13 +99,39 @@ export const RunMainExperience = (
                   }
                 });
               });
-              create(grid.get("centerCenter"), {
+              const lastText = create(grid.get("centerCenter"), {
                 type: "TextBlock",
                 text: text.text2,
                 fontSize: "14",
                 fontFamily: "Fira Code",
                 isComplete: false,
               });
+              const squares:IInkBlock[] = [];
+              lastText.onComplete(() => {
+                alert("Thats it, thanks for your attention.");
+                squares.forEach((s) => {
+                  inkManager.unregister(s)
+                  s.node.remove();
+                });
+              });
+              let hashChaned = false;
+              window.addEventListener('hashchange', ({newURL}: HashChangeEvent) => {
+                if (hashChaned) return;
+                if (newURL.split("#")[1] === 'i_want_to_see_all') {
+                hashChaned = true;
+                  const particles = lastText.getParticleAmount();
+                  const allParticles = inkManager.getAllInk();
+                  const requredParticles = particles - allParticles
+                  for (let i = 0; i < Math.floor((requredParticles)/9000) + 1; i += 1) {
+                    const location = ["leftTop", "rightBottom", "rightCenter", "centerBottom", "centerTop", "leftCenter"][i%6] as CellLocation;
+                    squares.push(create(grid.get(location), {
+                      type: "SquareBlock",
+                      particleAmount: Math.min(9000, requredParticles - i * 9000),
+                      isComplete: true,
+                    }));
+                  }
+                }
+              })
             });
           });
         });

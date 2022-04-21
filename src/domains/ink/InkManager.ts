@@ -49,13 +49,18 @@ export class InkManager {
     this.provideInkTo(ib);
   }
 
+  getAllInk(): number {
+    return this.inkBlocks.reduce((acc, cur) => acc + cur.getTakenParticleAmount(), 0);
+  }
+
+
   getInkForInkBlock(inkBlock: IInkBlock, amount: number): Coordinate[] {
     const res: Coordinate[] = [];
     let needToCollect = amount;
     const emptyBlocks = [inkBlock];
 
     while(needToCollect && emptyBlocks.length !== this.inkBlocks.length) {
-      const blocks = shuffleArray([...this.inkBlocks.filter(ib => !emptyBlocks.includes(ib))]);
+      const blocks = shuffleArray([...this.inkBlocks.filter(ib => !emptyBlocks.includes(ib)).slice(0, 5)]);
       blocks.forEach((block) => {
         const request = Math.floor(needToCollect / blocks.length);
         const coordsFromBlock = block.wipeParticleAmount(request || needToCollect);

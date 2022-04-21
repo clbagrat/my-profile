@@ -2,7 +2,7 @@ import './_locals/Grid.css';
 
 const Cells = ["leftTop", "centerTop", "rightTop", "leftCenter", "centerCenter", "rightCenter", "leftBottom", "centerBottom", "rightBottom"] as const;
 
-type CellLocation = typeof Cells[number];
+export type CellLocation = typeof Cells[number];
 
 export class Grid {
   private cells: Partial<Record<CellLocation, HTMLElement>> = {};
